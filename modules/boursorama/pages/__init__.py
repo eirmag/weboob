@@ -22,6 +22,7 @@
 from .account_history import AccountHistory
 from .accounts_list import AccountsList
 from .login import LoginPage
+from .two_authentication import AuthenticationPage
 
 class AccountPrelevement(AccountsList):
     pass
@@ -29,4 +30,5 @@ class AccountPrelevement(AccountsList):
 __all__ = ['LoginPage',
            'AccountsList',
            'AccountHistory',
+           'AuthenticationPage',
           ]

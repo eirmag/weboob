@@ -24,7 +24,7 @@ from __future__ import with_statement
 
 from weboob.capabilities.bank import ICapBank, AccountNotFound
 from weboob.tools.backend import BaseBackend, BackendConfig
-from weboob.tools.value import ValueBackendPassword
+from weboob.tools.value import ValueBackendPassword, ValueBool, Value
 
 from .browser import Boursorama
 
@@ -36,16 +36,22 @@ class BoursoramaBackend(BaseBackend, ICapBank):
     NAME = 'boursorama'
     MAINTAINER = u'Gabriel Kerneis'
     EMAIL = 'gabriel@kerneis.info'
-    VERSION = '0.e'
+    VERSION = '0.d'
     LICENSE = 'AGPLv3+'
     DESCRIPTION = u'Boursorama French bank website'
     CONFIG = BackendConfig(ValueBackendPassword('login',      label='Account ID', masked=False),
-                           ValueBackendPassword('password',   label='Password'))
+                           ValueBackendPassword('password',   label='Password'),
+                           ValueBool('enable_twofactors',            label='Send validation sms', default=False),
+                           Value('device',                label='Device name', regexp='\w*'),)
     BROWSER = Boursorama
 
     def create_default_browser(self):
-        return self.create_browser(self.config['login'].get(),
-                                   self.config['password'].get())
+        print "Helll"
+        return self.create_browser(
+            self.config["device"].get()
+            , self.config["enable_twofactors"].get()
+            , self.config['login'].get()
+            , self.config['password'].get())
 
     def iter_accounts(self):
         for account in self.browser.get_accounts_list():

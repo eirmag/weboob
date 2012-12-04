@@ -20,13 +20,16 @@
 
 
 from weboob.tools.browser import BaseBrowser, BrowserIncorrectPassword
-from .pages import LoginPage, AccountsList, AccountHistory
+from .pages import LoginPage, AccountsList, AccountHistory, AuthenticationPage
 
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
 
 __all__ = ['Boursorama']
+
+class BrowserIncorrectAuthenticationCode(BrowserIncorrectPassword):
+    pass
 
 
 class Boursorama(BaseBrowser):
@@ -35,12 +38,16 @@ class Boursorama(BaseBrowser):
     CERTHASH = '74429081f489cb723a82171a94350913d42727053fc86cf5bf5c3d65d39ec449'
     ENCODING = None  # refer to the HTML encoding
     PAGES = {
-             '.*connexion.phtml.*':                         LoginPage,
-             '.*/comptes/synthese.phtml':                   AccountsList,
+             '.*/connexion/securisation/index.phtml': AuthenticationPage,
+             '.*connexion.phtml.*': LoginPage,
+             '.*/comptes/synthese.phtml': AccountsList,
              '.*/comptes/banque/detail/mouvements.phtml.*': AccountHistory,
             }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, device="weboob", enable_twofactors=False
+                , *args, **kwargs):
+        self.device = device
+        self.enable_twofactors = enable_twofactors
         BaseBrowser.__init__(self, *args, **kwargs)
 
     def home(self):
@@ -49,20 +56,48 @@ class Boursorama(BaseBrowser):
     def is_logged(self):
         return not self.is_on_page(LoginPage)
 
+    def handle_authentication(self):
+        if self.is_on_page(AuthenticationPage):
+            if self.enable_twofactors:
+                self.page.authenticate(self.device)
+            else:
+                print
+                """Boursorama - activate the two factor authentication in boursorama config."""
+                """You will receive SMS code but are limited in request per day (around 15)"""
+
     def login(self):
         assert isinstance(self.username, basestring)
         assert isinstance(self.password, basestring)
+        assert isinstance(self.device, basestring)
+        assert isinstance(self.enable_twofactors, bool)
         assert self.password.isdigit()
 
         if not self.is_on_page(LoginPage):
-            self.location('https://' + self.DOMAIN + '/connexion.phtml')
+            self.location('https://' + self.DOMAIN + '/connexion.phtml', no_login=True)
 
         self.page.login(self.username, self.password)
 
         if self.is_on_page(LoginPage):
             raise BrowserIncorrectPassword()
 
+        #after login, we might be redirected to the two factor
+        #authentication page
+        print "handle authentication"
+        self.handle_authentication()
+
+        self.location('/comptes/synthese.phtml', no_login=True)
+
+        #if the login was correct but authentication code failed,
+        #we need to verify if bourso redirect us to login page or authentication page
+        if self.is_on_page(LoginPage):
+            print "not correct after handling authentication"
+            raise BrowserIncorrectAuthenticationCode()
+
+        print "login over"
+
+
     def get_accounts_list(self):
+        print "Try to get account list"
         if not self.is_on_page(AccountsList):
             self.location('/comptes/synthese.phtml')
 
