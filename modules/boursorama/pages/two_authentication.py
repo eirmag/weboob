@@ -94,7 +94,7 @@ class AuthenticationPage(BasePage):
             r"value=\\\"(?P<value>\w*?)\\\"")
         r = regex.search(info)
         token = r.group('value')
-        print "Extracted token", token
+        #print "Extracted token", token
         #self.print_cookies()
 
         #step2
@@ -110,7 +110,7 @@ class AuthenticationPage(BasePage):
         #self.print_cookies()
 
         pin = raw_input('Enter the "Boursorama Banque" access code:')
-        print "Pin access code: ''%s''" % (pin)
+        #print "Pin access code: ''%s''" % (pin)
         url = "https://" + DOMAIN + "/ajax/banque/otp.phtml"
         data = "authentificationforteToken=%s&authentificationforteStep=otp&alertType=10100&org=%s&otp=%s&validate=" % (token, REFERER, pin)
         req = urllib2.Request(url, data, headers_ajax)
@@ -126,8 +126,7 @@ class AuthenticationPage(BasePage):
         req = urllib2.Request(url, data, headers=headers)
         response = self.browser.open(req)
 
-        result =        response.read()
-
+        #result =        response.read()
         #print response, "\n", response.info()
         #write_debug(result, "step4.html")
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+# Copyright(C) 2012      Gabriel Serme
 # Copyright(C) 2011      Gabriel Kerneis
 # Copyright(C) 2010-2011 Jocelyn Jaubert
 #
@@ -72,7 +73,8 @@ class Boursorama(BaseBrowser):
         assert isinstance(self.enable_twofactors, bool)
         assert self.password.isdigit()
 
-        self.SAVE_RESPONSES = True
+        #for debug, save requested pages to tmp dir
+        #self.SAVE_RESPONSES = True
 
         if not self.is_on_page(LoginPage):
             self.location('https://' + self.DOMAIN + '/connexion.phtml')
@@ -84,7 +86,7 @@ class Boursorama(BaseBrowser):
 
         #after login, we might be redirected to the two factor
         #authentication page
-        print "handle authentication"
+        #print "handle authentication"
         self.handle_authentication()
 
         self.location('/comptes/synthese.phtml', no_login=True)
@@ -92,14 +94,13 @@ class Boursorama(BaseBrowser):
         #if the login was correct but authentication code failed,
         #we need to verify if bourso redirect us to login page or authentication page
         if self.is_on_page(LoginPage):
-            print "not correct after handling authentication"
+            #print "not correct after handling authentication"
             raise BrowserIncorrectAuthenticationCode()
 
-        print "login over"
+        #print "login over"
 
 
     def get_accounts_list(self):
-        print "Try to get account list"
         if not self.is_on_page(AccountsList):
             self.location('/comptes/synthese.phtml')
 
