@@ -61,9 +61,9 @@ class Boursorama(BaseBrowser):
             if self.enable_twofactors:
                 self.page.authenticate(self.device)
             else:
-                print
-                """Boursorama - activate the two factor authentication in boursorama config."""
-                """You will receive SMS code but are limited in request per day (around 15)"""
+                print \
+                """Boursorama - activate the two factor authentication in boursorama config."""\
+                """ You will receive SMS code but are limited in request per day (around 15)"""
 
     def login(self):
         assert isinstance(self.username, basestring)
@@ -72,8 +72,10 @@ class Boursorama(BaseBrowser):
         assert isinstance(self.enable_twofactors, bool)
         assert self.password.isdigit()
 
+        self.SAVE_RESPONSES = True
+
         if not self.is_on_page(LoginPage):
-            self.location('https://' + self.DOMAIN + '/connexion.phtml', no_login=True)
+            self.location('https://' + self.DOMAIN + '/connexion.phtml')
 
         self.page.login(self.username, self.password)
 

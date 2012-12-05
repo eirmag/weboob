@@ -51,15 +51,13 @@ class AuthenticationPage(BasePage):
         @exception BrowserIncorrectAuthenticationCode when code is not correct
         """
         DOMAIN = self.browser.DOMAIN
-        SECURE_PAGE = "https://www.boursorama.com/comptes/connexion/"\
-            "securisation/index.phtml"
+        SECURE_PAGE = "https://www.boursorama.com/comptes/connexion/securisation/index.phtml"
         REFERER = SECURE_PAGE
 
         #print "Need to authenticate for device", device
         #print "Domain information", DOMAIN
 
-        url = "https://%s/ajax/banque/otp.phtml?org=%s&alertType=10100"\
-                % (DOMAIN, REFERER)
+        url = "https://%s/ajax/banque/otp.phtml?org=%s&alertType=10100" % (DOMAIN, REFERER)
         #print url
         headers = {"User-Agent": "Mozilla/5.0 (Windows; U; Windows "
             "NT 5.1; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8"
@@ -83,10 +81,9 @@ class AuthenticationPage(BasePage):
         #extrat authentication token from response (in form)
         info = response.read()
 
-        write_debug(info, "step1.html")
+        #write_debug(info, "step1.html")
 
-        regex = re.compile(r"vous avez atteint le nombre maximum d'utilisation"
-            " de l'authentification forte.")
+        regex = re.compile(r"vous avez atteint le nombre maximum d'utilisation de l'authentification forte.")
         r = regex.search(info)
         if r:
             print "Boursorama - Vous avez atteint le nombre maximum d'utilisation de l'authentification forte"
@@ -102,41 +99,39 @@ class AuthenticationPage(BasePage):
 
         #step2
         url = "https://" + DOMAIN + "/ajax/banque/otp.phtml"
-        data = "authentificationforteToken=%s&authentificationforteStep=start"\
-            "&alertType=10100&org=%s&validate=" % (token, REFERER)
+        data = "authentificationforteToken=%s&authentificationforteStep=start&alertType=10100&org=%s&validate=" % (token, REFERER)
         req = urllib2.Request(url, data, headers_ajax)
         response = self.browser.open(req)
-        info = response.read()
+        #info = response.read()
         #print "after asking to send token authentification" \
         #   ,len(info), response.info()
-        write_debug(info, "step2.html")
+        #write_debug(info, "step2.html")
 
         #self.print_cookies()
 
         pin = raw_input('Enter the "Boursorama Banque" access code:')
+        print "Pin access code: ''%s''" % (pin)
         url = "https://" + DOMAIN + "/ajax/banque/otp.phtml"
-        data = "authentificationforteToken=%s&authentificationforteStep=otp"\
-            "&alertType=10100&org=%s&validate=&otp=%s" % (token, REFERER, pin)
-        req = urllib2.Request(url, data, headers)
+        data = "authentificationforteToken=%s&authentificationforteStep=otp&alertType=10100&org=%s&otp=%s&validate=" % (token, REFERER, pin)
+        req = urllib2.Request(url, data, headers_ajax)
         response = self.browser.open(req)
-        info = response.read()
-        #print "after pin authentification", len(info)\
-        #    , response.info()
-        write_debug(info, "step3.html")
+        #info = response.read()
+        #print "after pin authentification", len(info), response.info()
+        #write_debug(info, "step3.html")
 
         #self.print_cookies()
 
         url = "%s?" % (SECURE_PAGE)
         data = "org=/&device=%s" % (device)
-        req = urllib2.Request(url, headers=headers)
+        req = urllib2.Request(url, data, headers=headers)
         response = self.browser.open(req)
 
         result =        response.read()
 
-        #print result, "\n", response, "\n", response.info()
-        write_debug(result, "step4.html")
+        #print response, "\n", response.info()
+        #write_debug(result, "step4.html")
 
-        self.print_cookies()
+        #self.print_cookies()
 
     def print_cookies(self):
         for c in self.browser._ua_handlers["_cookies"].cookiejar:
